@@ -2,8 +2,8 @@ name: Heroku OFF
 
 on:
   schedule:
-    # Disable Heroku app at 17:00 UTC every day
-    - cron: '0 17 * * *'
+    # Disable Heroku app at 16:59 UTC every day
+    - cron: '59 16 * * *'
 
 jobs:
   heroku:
