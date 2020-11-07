@@ -12,5 +12,5 @@ jobs:
     steps:
       - name: enable-heroku-app
         run: |
-          wget https://raw.githubusercontent.com/wabarc/on-heroku/master/maintenance.sh -O maintenance.sh
+          wget https://raw.githubusercontent.com/wabarc/on-heroku/main/maintenance.sh -O maintenance.sh
           sudo sh maintenance.sh -k ${{ secrets.HEROKU_APIKEY }} -a ${{ secrets.HEROKU_APPNAME }} -m on
