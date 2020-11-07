@@ -13,4 +13,4 @@ jobs:
       - name: disable-heroku-app
         run: |
           wget https://raw.githubusercontent.com/wabarc/on-heroku/master/maintenance.sh -O maintenance.sh
-          sh maintenance.sh -k ${{ secrets.HEROKU_APIKEY }} -a ${{ secrets.HEROKU_APPNAME }} -m off
+          sudo sh maintenance.sh -k ${{ secrets.HEROKU_APIKEY }} -a ${{ secrets.HEROKU_APPNAME }} -m off
