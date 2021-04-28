@@ -1,0 +1,47 @@
+name: Shutdown x | Startup k
+
+on:
+  schedule:
+    # Switch Heroku app every month
+    - cron: '55 23 15 * *'
+  workflow_dispatch:
+  repository_dispatch:
+    types: [release]
+
+jobs:
+  continue:
+    name: Continue
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.from == 'wabarc/on-heroku' }} || ${{ github.event_name == 'workflow_dispatch' }} || ${{ github.event_name == 'schedule' }}
+    outputs:
+      yes: ${{ steps.validation.outputs.result }}
+    steps:
+      - name: Set up Env
+        id: date
+        run: echo "::set-output name=date::$(date +'%d')"
+      - name: Continue
+        if: ${{ steps.date.outputs.date >= 15 }}
+        id: validation
+        run: echo "::set-output name=result::true"
+
+  startup-k:
+    runs-on: ubuntu-latest
+    name: 'Startup K'
+    needs: continue
+    if: ${{ needs.continue.outputs.yes == 'true' }}
+    steps:
+      - name: 'Set up maintenance mode to off'
+        run: |
+          wget https://raw.githubusercontent.com/wabarc/on-heroku/main/maintenance.sh -O maintenance.sh
+          sudo sh maintenance.sh -k ${{ secrets.HEROKU_API_KEY_K }} -a ${{ secrets.HEROKU_APPNAME_K }} -m off
+
+  shutdown-x:
+    runs-on: ubuntu-latest
+    name: 'Shutdown X'
+    needs: continue
+    if: ${{ needs.continue.outputs.yes == 'true' }}
+    steps:
+      - name: 'Set up maintenance mode to on'
+        run: |
+          wget https://raw.githubusercontent.com/wabarc/on-heroku/main/maintenance.sh -O maintenance.sh
+          sudo sh maintenance.sh -k ${{ secrets.HEROKU_API_KEY_X }} -a ${{ secrets.HEROKU_APPNAME_X }} -m on

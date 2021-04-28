@@ -1,0 +1,39 @@
+name: Maintenance T
+
+on:
+  schedule:
+    - cron: '0 */12 * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Maintenance mode: on, off'
+        required: true
+        default: 'on'
+
+jobs:
+  continue:
+    name: Continue
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'schedule' }} || ${{ github.event_name == 'workflow_dispatch' }}
+    outputs:
+      mode: ${{ steps.mode.outputs.result }}
+    steps:
+      - name: Set up maintenance mode
+        id: mode
+        run: |
+          if [ -z "${{ github.event.inputs.mode }}" ]; then
+            echo "::set-output name=result::on"
+          else
+            echo "::set-output name=result::${{ github.event.inputs.mode }}"
+          fi
+
+  maintenance-t:
+    runs-on: ubuntu-latest
+    name: 'Maintenance T'
+    needs: continue
+    if: ${{ needs.continue.outputs.mode != '' }}
+    steps:
+      - name: 'Set up maintenance mode to ${{ needs.continue.outputs.mode }}'
+        run: |
+          wget https://raw.githubusercontent.com/wabarc/on-heroku/main/maintenance.sh -O maintenance.sh
+          sudo sh maintenance.sh -k ${{ secrets.HEROKU_API_KEY_T }} -a ${{ secrets.HEROKU_APPNAME_T }} -m ${{ needs.continue.outputs.mode }}
