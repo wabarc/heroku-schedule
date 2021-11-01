@@ -37,3 +37,26 @@ jobs:
         run: |
           wget https://raw.githubusercontent.com/wabarc/on-heroku/main/maintenance.sh -O maintenance.sh
           sudo sh maintenance.sh -k ${{ secrets.HEROKU_API_KEY_T }} -a ${{ secrets.HEROKU_APPNAME_T }} -m ${{ needs.continue.outputs.mode }}
+
+  logging:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    name: 'Write log'
+    needs: continue
+    steps:
+      - name: 'Check out code base'
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: 'Write log to gitkeep branch'
+        shell: bash
+        run: |
+          now="$(TZ=UTC date +'%Y/%m/%dT%T%Z')"
+          git checkout .
+          git checkout gitkeep
+          echo "${now}" > t.log
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "<41898282+github-actions[bot]@users.noreply.github.com>"
+          git commit --no-gpg-sign -am "Scheduled at ${now}"
+          git pull --ff --commit
+          git push
