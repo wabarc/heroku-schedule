@@ -18,11 +18,11 @@ jobs:
     steps:
       - name: Set up Env
         id: date
-        run: echo "::set-output name=date::$(date +'%d')"
+        run: echo "date=$(date +'%d')" >> $GITHUB_OUTPUT
       - name: Continue
         if: ${{ steps.date.outputs.date >= 15 }}
         id: validation
-        run: echo "::set-output name=result::true"
+        run: echo "result=true" >> $GITHUB_OUTPUT
 
   startup-k:
     runs-on: ubuntu-latest
